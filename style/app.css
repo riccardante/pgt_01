@@ -224,6 +224,7 @@ ul, ol, li {
 }
 div[role="main"] {
   background: #fff;
+height: 100%;
   height: calc(100% - 5rem);
   overflow: hidden;
 }
