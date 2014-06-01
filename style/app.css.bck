@@ -224,7 +224,6 @@ ul, ol, li {
 }
 div[role="main"] {
   background: #fff;
-  height: 100%;
   height: calc(100% - 5rem);
   overflow: hidden;
 }
@@ -310,11 +309,10 @@ color: #000;
 
 
 #homeCourier{
-   height: 95%;
+      height: -webkit-calc(100%);
+   height: calc(100% );
       overflow: hidden;
-}
-#homeCourier p{
-  height: 100%; 
+   
 }
 
 
@@ -439,19 +437,7 @@ a[role="icona"]{
   #leg-accetta{
       padding-left:30px;
       }
-
-  #legend-position{
-  position:absolute;
-  padding: 5px;
-  top:60px;right:14px;
-  z-index:1;      
-    border-radius:3px;
-  width:220px;
-  border:1px solid rgba(0,0,0,0.4);
-  background-color: #ffffff;
-}
-
-
+  
   #legend-content{
   position:absolute;
   padding: 5px;
@@ -470,7 +456,6 @@ a[role="icona"]{
   overflow: scroll;
   height: 95%; 
 }
-
 
 
 
@@ -644,16 +629,3 @@ a[role="icona"]{
       margin-top: 1em;
     }
 }
-
-
-
-.submenu {
-font-size: 1.1rem;
-line-height: 1.3rem;
-padding-left: 3rem;
-}
-
-.userDetail{
-    font-size: 2.5rem;
-    padding: 0.7rem;
-    }

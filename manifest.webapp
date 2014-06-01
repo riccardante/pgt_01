@@ -11,5 +11,10 @@
   {
      "60": "/style/icons/icon_60.png" ,
      "128": "/style/icons/icon_128.png"
+  },
+  "permissions": {
+    "geolocation": {
+      "description": "Marking out user location"
+    }
   }
 } 

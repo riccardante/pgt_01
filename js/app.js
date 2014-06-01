@@ -6,6 +6,16 @@ var wrapper = document.getElementById("signature-pad"),
     signaturePad;
 */
 
+/*
+symbol: k
+*/
+
+
+var user = "";
+//  https://graph.facebook.com/riccardo.luna/picture
+
+var mapID = "riccardante.i974c6me";
+
 var wrapper;
 var clearButton;
 var saveButton;
@@ -24,7 +34,7 @@ var m1;
 var m2;
 var legend;
 
-var divs = ["splash","menu", "homeClient", "homeCourier", "dashboard", "request", "communication", "aboutApp","drawer-controller-hide","drawer-controller-show", "profilo", "legend-content","dettaglio","signature"];
+var divs = ["splash","menu", "homeClient", "homeCourier", "dashboard", "request", "communication", "aboutApp","drawer-controller-hide","drawer-controller-show", "profilo", "legend-content","dettaglio","signature","loginForm","legend-position"];
 //"drawer-controller",
 
 
@@ -34,15 +44,16 @@ var stato=0;
 var azioni = ["Ritira", "Consegna", "Chuso"];
 var azione=0;
 
-// PRENDERE POSIZIONE DA GPS!!
-var posizione = {"lat":"41.891735559388124" , "lon" : "12.491819858551025"};
 
-var destinazioni = [
-{"lat":"" , "lon":"" , "name": "Universita", "items":"0"},
-{"lat":"" , "lon":"" , "name": "Casa", "items":"0"},
-{"lat":"41.9132638845839" , "lon":"12.504587173461914" , "name": "Mamma", "items":"2"},
-];
+
+
+// PRENDERE POSIZIONE DA GPS!!
+var posizione = {"lat":"41.891735559388124" , "lon" : "12.491819858551025", "address":"unable to get position"};
+
+
+
 var destinazione = 0;
+
 
 var percorsi = [
 {"latfrom":"41.89205502378826", "lonfrom":"12.49094009399414",  "latto":"41.914",  "lonto":"12.499",  "from":"Via del Colosseo, 12",  "to":"Via di Villa Albani",  "obj":"Busta",  "note":"URGENTE", "peso": "30g"},
@@ -64,16 +75,71 @@ function showDrawerController(){
 }
 
 
+var getPositionOnSuccess = function (position) {
+    console.log('Latitude: ' + position.coords.latitude + '\n' +     'Longitude: ' + position.coords.longitude + '\n');
+
+   posizione.lat = position.coords.latitude ;
+   posizione.lon = position.coords.longitude ;
+   ridisegnaMappa();
+   getAddress();
+};
+function getPositionOnError(error) {
+    console.log('Error getting GPS Data');
+}
+
+function getPosition(){
+  navigator.geolocation.getCurrentPosition(getPositionOnSuccess, getPositionOnError);
+}
+
+function getAddress(){
+  url = "http://api.tiles.mapbox.com/v3/"+mapID+"/geocode/"+posizione.lon+","+posizione.lat+".json";
+  $.getJSON( url, function( data ) {
+    posizione.address=data.results[0][0].name +" ("+data.results[0][2].name+")";
+    console.log("Posizione: " + data.results[0][0].name +" ("+data.results[0][2].name+")");
+   document.getElementById("leg-posizione").innerHTML = data.results[0][0].name +" ("+data.results[0][2].name+")";
+  
+
+  });
+}
+
+
+
 
 function startApp(){
   hideAll();
+user = [{
+  "code":"1",
+  "name":"Andrea", 
+  "surname":"Ercoli", 
+  "email":"andrea-ercoli@hotmail.it", 
+  "image":"style/images/userphoto.jpg", 
+  "mobile":"3333333333",
+  "password":"",
+  "mezzo":"bike",
+  "destinazioni":  [
+     {"lat":"" , "lon":"" , "name": "Universita", "items":"0", "address":"P. Aldo Moro"},
+     {"lat":"" , "lon":"" , "name": "Casa", "items":"0", "address":"Piazza Bologna"},
+     {"lat":"41.9132638845839" , "lon":"12.504587173461914" , "name": "Mamma", "items":"2", "address":"Via Alessandria"}
+  ]
+}];
+
+getPosition();
+
+
   if(username == ""){
     document.getElementById("splash").style.display = "block";
 
+    document.getElementById("menuUsername").innerHTML = user[0].name;
+    if(user[0].mezzo != ""){
+        // BUG se non ho un mezzo iniziale non posso impostarlo mai.. 
+        document.getElementById("menuUsername").innerHTML = document.getElementById("menuUsername").innerHTML + ' (<div id="div-MezzoTrasporto"></div>)';
+    }
+
+
     //POPOLA MENU (da spostare alla login + ciclo from server)
-    document.getElementById("btn-Request0").innerHTML = destinazioni[0].name + " <em>("+ destinazioni[0].items  +")</em>";
-    document.getElementById("btn-Request1").innerHTML = destinazioni[1].name + " <em>("+ destinazioni[1].items  +")</em>";
-    document.getElementById("btn-Request2").innerHTML = destinazioni[2].name + " <em>("+ destinazioni[2].items  +")</em>";
+    document.getElementById("btn-Request0").innerHTML = user[0].destinazioni[0].name + " <em>("+ user[0].destinazioni[0].items  +")</em>" + "<span class='submenu'>"+user[0].destinazioni[0].address+"</span>";
+    document.getElementById("btn-Request1").innerHTML = user[0].destinazioni[1].name + " <em>("+ user[0].destinazioni[1].items  +")</em>" + "<span class='submenu'>"+user[0].destinazioni[1].address+"</span>";
+    document.getElementById("btn-Request2").innerHTML = user[0].destinazioni[2].name + " <em>("+ user[0].destinazioni[2].items  +")</em>" + "<span class='submenu'>"+user[0].destinazioni[2].address+"</span>";
 
     // DO TEST HERE
   }else{
@@ -95,24 +161,35 @@ function showHome(){
 
 
 function showHomeClient(){
+  showHomeCourier();
+/*
   hideAll();
   loginas = "client";
   showDrawerController();
   document.getElementById("homeClient").style.display = "block";
   document.getElementById("addtitle").innerHTML=" - Client";
+*/
 }
 
 function showHomeCourier(){
   hideAll();
+  document.getElementById("legend-position").style.display = "block";
   loginas = "courier";
   showDrawerController();
   document.getElementById("homeCourier").style.display = "block";
   document.getElementById("addtitle").innerHTML=" - Home";
   
   if(typeof(map) == "undefined" ){  
-  map =  L.mapbox.map('homeCourier', 'riccardante.i974c6me') 
+  map =  L.mapbox.map('homeCourier', mapID) 
 .setView([posizione.lat, posizione.lon], 16);
   L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+    p1 = L.marker([posizione.lat, posizione.lon], {
+      icon: L.mapbox.marker.icon({
+        'marker-size': 'medium',
+        'marker-symbol': 'star',
+        'marker-color': '#1087bf'
+      })
+    }).addTo(map);
 
   }else{
 
@@ -124,6 +201,7 @@ function showHomeCourier(){
 //  map.removeControl(legend);
 //  legend = map.legendControl.removeLegend(legend);
   document.getElementById("legend-content").style.display = "none";
+  document.getElementById("legend-position").style.display = "none";
 
 
 
@@ -132,10 +210,36 @@ function showHomeCourier(){
 }
 
 
+function ridisegnaMappa() {
+  if(typeof(map) != "undefined" ){  
+    map.setView([posizione.lat, posizione.lon], 16)
+    L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+
+    p1 = L.marker([posizione.lat, posizione.lon], {
+      icon: L.mapbox.marker.icon({
+        'marker-size': 'medium',
+        'marker-symbol': 'star',
+        'marker-color': '#1087bf'
+      })
+    }).addTo(map);
+
+  }  
+}
+
+
+
 function showProfilo(){
   hideAll();
   showDrawerController();
   document.getElementById("profilo").style.display = "block";
+  document.getElementById("profileUserPhoto").src = user[0].image;
+  document.getElementById("profileUserName").innerHTML = user[0].name;
+  document.getElementById("profileUserSurname").innerHTML = user[0].surname;
+
+  document.getElementById("profileUserEmail").innerHTML = user[0].email;
+  document.getElementById("profileUserMobile").innerHTML = user[0].mobile;
+  document.getElementById("profileUserPassword").innerHTML = "******";
+
   document.getElementById("addtitle").innerHTML=" - Profilo";
 
 }
@@ -147,15 +251,15 @@ function showRequests(){
   hideAll();
   showDrawerController();
   document.getElementById("homeCourier").style.display = "block";
-  document.getElementById("addtitle").innerHTML=" - " +  destinazioni[destinazione].name ;
+  document.getElementById("addtitle").innerHTML=" - " +  user[0].destinazioni[destinazione].name ;
   
   // percorso[percorso]
 
-  map.setView([(Number(destinazioni[destinazione].lat)+Number(posizione.lat))/2,
-                (Number(destinazioni[destinazione].lon)+Number(posizione.lon))/2], 
+  map.setView([(Number(user[0].destinazioni[destinazione].lat)+Number(posizione.lat))/2,
+                (Number(user[0].destinazioni[destinazione].lon)+Number(posizione.lon))/2], 
         14)
 
-dest = L.marker([Number(destinazioni[destinazione].lat), Number(destinazioni[destinazione].lon)], {
+dest = L.marker([Number(user[0].destinazioni[destinazione].lat), Number(user[0].destinazioni[destinazione].lon)], {
     icon: L.mapbox.marker.icon({
         'marker-size': 'large',
         'marker-symbol': 'embassy',
@@ -163,7 +267,7 @@ dest = L.marker([Number(destinazioni[destinazione].lat), Number(destinazioni[des
     })
 }).addTo(map);
 
-  destCircle = L.circle([Number(destinazioni[destinazione].lat), Number(destinazioni[destinazione].lon)], 200).addTo(map);
+  destCircle = L.circle([Number(user[0].destinazioni[destinazione].lat), Number(user[0].destinazioni[destinazione].lon)], 200).addTo(map);
 
 
 // FROM  41.89205502378826, 12.49094009399414   percorsi[percorso].latfrom 
@@ -189,7 +293,7 @@ m2 = L.marker([percorsi[percorso].latto, percorsi[percorso].lonto], {
   document.getElementById("legend-content").style.display = "block";
 
 // popola LEGENDA
-  document.getElementById("leg-numpercorso").innerHTML=  (percorso+1) + "/" + destinazioni[destinazione].items;
+  document.getElementById("leg-numpercorso").innerHTML=  (percorso+1) + "/" + user[0].destinazioni[destinazione].items;
   document.getElementById("leg-from").innerHTML=  percorsi[percorso].from;
   document.getElementById("leg-to").innerHTML=  percorsi[percorso].to;
   document.getElementById("leg-object").innerHTML=  percorsi[percorso].obj + "("+percorsi[percorso].peso+")";
@@ -283,7 +387,7 @@ function selectPrev(){
   if(percorso>0){
     percorso=percorso-1;
   }else{
-    percorso = Number(destinazioni[destinazione].items-1);
+    percorso = Number(user[0].destinazioni[destinazione].items-1);
   }
   showRequests();
 }
@@ -297,7 +401,7 @@ function selectNext(){
   // legend = map.legendControl.removeLegend(legend);
   document.getElementById("legend-content").style.display = "none";
 
-  if(percorso<Number(destinazioni[destinazione].items)-1){
+  if(percorso<Number(user[0].destinazioni[destinazione].items)-1){
     percorso=percorso+1;
   }else{
     percorso = 0 ;
@@ -353,7 +457,8 @@ function showSignature(){
 
 window.onload = function () {
   // aggiungo i listner	
-  document.getElementById("bLoginCourier").addEventListener("click", showHomeCourier);
+  //// document.getElementById("bLoginCourier").addEventListener("click", showHomeCourier);
+  document.getElementById("bLoginClient").addEventListener("click", showHomeClient);
   document.getElementById("btn-Profilo").addEventListener("click", showProfilo);
 
   document.getElementById("menuUsername").addEventListener("click", showHome);
@@ -798,3 +903,15 @@ var SignaturePad = (function (document) {
 
     return SignaturePad;
 })(document);
+
+
+
+
+
+
+
+
+
+
+/////////////////////  AJAX
+// 20140601 deciso di introdurre jquery ..

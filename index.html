@@ -14,6 +14,8 @@
  <!-- link rel="stylesheet" type="text/css" href="css/MarkerCluster.Default.css" / -->
 
 
+ <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+
  <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
  <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
 
@@ -24,7 +26,7 @@
 
 <section id="menu" data-type="sidebar">
   <header>
-    <h1 ><a id="menuUsername" href='#'>Andrea (<div id="div-MezzoTrasporto"></div>)</a></h1>
+    <h1 ><a id="menuUsername" href='#'></a></h1>
   </header>
    <nav>
     <h2>Posizioni salvate</h2>
@@ -33,9 +35,9 @@
         <li><a href="#" id="btn-Request1"></a></li>
         <li><a href="#" id="btn-Request2"></a></li>
     </ul>
-    <h2>Profilo</h2>
+    <h2><a href="#" id="btn-Profilo">Profilo</a></h2>
     <ul>
-        <li><a href="#" id="btn-Profilo">Profilo</a></li>
+        <!-- <li><a href="#" id="btn-Profilo">Profilo</a></li> -->
         <li><a href="#" id="btn-LogOff">Log off</a></li>
         <!-- <li><a href="#" id="btn-MezzoTrasporto">Cambia mezzo</a></li>  -->
         <li><a href="#" id="btn-About">About</a></li>
@@ -63,15 +65,44 @@
     <div id="splash">
       <div id="logo" class="center"></div>
       <div class="center">
-        <div class="center"><a id="bLoginClient"  role="button" href="#">Login Cliente</a> </div>
-        <a id="bLoginCourier" class="center" role="button" href="#">Login Corriere</a>
+        <div class="center"><a id="bLoginClient"  role="button" href="#">Login User</a> </div>
+        <!-- <a id="bLoginCourier" class="center" role="button" href="#">Login Corriere</a> -->
       </div>   
     </div>
 
     <!-- HOMECOURIER -->
     <div id="homeCourier">
-     <p></p> 
+        <p></p>      
     </div>
+
+
+    <!-- HOMECLIENT -->
+    <div id="homeClient">
+     <p></p>
+    </div>
+
+    <!--  LOGINFORM  -->
+    <div id="loginForm">
+      <form>
+        <fieldset>
+         <legend>Username</legend>
+          <section><p><input id="signin-username" type="text" placeholder="username" required="required"></p></section>
+         </fieldset>
+         <fieldset>
+        <legend>Password</legend>
+        <section><p><input id="signin-password" type="password" placeholder="****" required="required"></p></section>
+       </fieldset>
+
+      <a id="bFormSignIn" role="button" href="#">Sign in</a>
+      </form>   
+    </div>
+
+
+ <div id='legend-position' style="display:none;" >
+    <div class='my-legend'>
+      <div class='legend-title'>Posizione: <span id="leg-posizione"></span></div>
+    </div>
+  </div>  
 
   <div id='legend-content' style="display:none;" >
     <div class='my-legend'>
@@ -87,35 +118,31 @@
 
     <!-- PROFILO -->
     <div id="profilo">
-        <div class="imgLeft"><img src="https://graph.facebook.com/riccardo.luna/picture"></img></div>
-        <p>Andrea Ercoli</p>
+        <div class="userRef">
+          <div class="imgLeft"><img id="profileUserPhoto" src=""></img></div>
+          <div id="profileUserName" class="userDetail"></div>
+          <div id="profileUserSurname"class="userDetail"></div>
+        </div>
+        <div class="userRef">
+          <div id="profileUserEmail" class="userDetail"></div>
+          <div id="profileUserMobile"class="userDetail"></div>
+          <div id="profileUserPassword" class="userDetail"></div>
+        </div>
+
         <div id="prof-mezzoDiTrasporto">
-         <div class="center">
+         <div class="">
           <a id="prof-bike" role="icona" href="#"></a>
           <a id="prof-scooter" role="icona" href="#"></a>
           <a id="prof-auto" role="icona" href="#"></a>
           <a id="prof-treno" role="icona" href="#"></a>
          </div> 
         </div>
+        <a id="bProfileEdit" role="button" href="#">Modifica</a>
+        <a id="bProfileLogout" role="button" href="#">Logout</a>
     </div>
 
 
 
-    <!-- HOMECLIENT -->
-    <div id="homeClient">
-      <form>
-        <fieldset>
-         <legend>Username</legend>
-          <section><p><input id="signin-username" type="text" placeholder="username" required="required"></p></section>
-         </fieldset>
-         <fieldset>
-        <legend>Password</legend>
-        <section><p><input id="signin-password" type="password" placeholder="****" required="required"></p></section>
-       </fieldset>
-
-      <a id="bFormSignIn" role="button" href="#">Sign in</a>
-      </form>   
-    </div>
 
 
     
