@@ -264,22 +264,22 @@ height: 430px;
   height: auto;
 }
 /* Twitter */
-#communication , #dashboard, #dettaglio{
+#communication , #dashboard, #dettaglio, #bacheca{
   padding: 1rem;
   overflow: scroll;
   height: 91%;    
 }
-#communication li, #dashboard li, #dettaglio li {   
+#communication li, #dashboard li, #dettaglio li, #bacheca li {   
   border-bottom: solid #BE4D2C;
   height: auto;
 }
-#communication li p, #dashboard li p , #dettaglio li p{
+#communication li p, #dashboard li p , #dettaglio li p, #bacheca li p{
   font-size: 1.3rem;
   padding-left: 60px;
   font-family: FiraSansOT-Light;
 } 
 
-#dashboard li a {
+#dashboard li a, #bacheca li a {
 color: #000;
 } 
 
@@ -462,7 +462,18 @@ a[role="icona"]{
   border:1px solid rgba(0,0,0,0.4);
   background-color: #ffffff;
 }
+#legend-actionbar{
+  position:absolute;
+  padding: 5px;
+  bottom:0px;
+  left:0px;
+    right:0px;
+  z-index:1;      
+    border-radius:3px;
+  border:1px solid rgba(0,0,0,0.4);
+  background-color: #ffffff;
 
+}
 
 
 #homeCurruer{
@@ -657,3 +668,18 @@ padding-left: 3rem;
     font-size: 2.5rem;
     padding: 0.7rem;
     }
+
+
+
+#splashScreen{
+z-index: 100;
+position: absolute;
+height: 100%;
+width: 100%;
+top: 0;
+background: #fff;    
+}
+
+#splashScreen p{
+    heigth:100%;
+}

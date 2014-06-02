@@ -1,66 +1,69 @@
-/*
-var wrapper = document.getElementById("signature-pad"),
-    clearButton = wrapper.querySelector("[data-action=clear]"),
-    saveButton = wrapper.querySelector("[data-action=save]"),
-    canvas = wrapper.querySelector("canvas"),
-    signaturePad;
-*/
-
-/*
-symbol: k
-*/
-
-
-var user = "";
-//  https://graph.facebook.com/riccardo.luna/picture
+/*   VARIABILI  */
+var divs = ["splash","menu", "homeClient", "homeCourier", "dashboard", "request", "communication", "aboutApp","drawer-controller-hide","drawer-controller-show", "profilo", "legend-content","dettaglio","signature","loginForm","legend-position","nuovoIndirizzoForm","nuovoOrdineForm","bacheca","splashScreen","legend-actionbar"];
 
 var mapID = "riccardante.i974c6me";
 
+var stati = ["da ritirare", "da consegnare", "consegnato"];
+var stato=0;
+var azioni = ["Ritira", "Consegna", "Chuso"];
+var azione=0;
+
+// la posizione va presa dal GPS
+var posizione = {"lat":"41.891735559388124" , "lon" : "12.491819858551025", "address":"impossibile ottenere la posizione"};
+
+var shops = [ {"name":"Gruppo Clark",
+                                      "items" : [     
+                                                      {"lat":"41.870128" , "lon":"12.467932" , "name": "Ostiense", "items":"2", "address":"Piazza della Radio, 85"},
+                                                      {"lat":"41.83682786072714" , "lon":"12.600535154342651" , "name": "Tuscolana", "items":"1", "address":"Via Tuscolana, 1243"},
+                                                      {"lat":"41.798319627369516" , "lon":"12.297563552856445" , "name": "Parco Leonardo", "items":"0", "address":"Piazza M. Buonarroti, 36/47"},
+                                                      {"lat":"42.058884061856666" , "lon":"12.58410930633545" , "name": "Monterotondo", "items":"0", "address":"Via Salaria, 221"}
+                                                    ]
+                   }];
+//shops[0].items[1].name
+
+var destinazione = 0;
+
+
+
+var percorsi = [
+                         {"latfrom":"41.89205502378826", "lonfrom":"12.49094009399414",  "latto":"41.914",  "lonto":"12.499",  "from":"Via del Colosseo, 12",  "to":"Via di Villa Albani",  "obj":"Busta",  "note":"URGENTE", "peso": "30g"},
+                         {"latfrom":"41.892550190450876", "lonfrom":"12.492753267288208",  "latto":"41.91228983675952",  "lonto":"12.507333755493164",  "from":"Via della Polveriera",  "to":"Viale Regina Marg..",  "obj":"Pacco",   "note":"FRAGILE", "peso": "500g"}
+];
+var percorso=0;
+
+var user = "";
 var wrapper;
 var clearButton;
 var saveButton;
 var canvas;
 var signaturePad;
-
-
 var username="";
-var loginas ="";
+var loginas ="";  // courier o user
 var map;
 
-
+var p1;
+var pCircle;
 var dest;
 var destCircle;
 var m1;
 var m2;
 var legend;
-
-var divs = ["splash","menu", "homeClient", "homeCourier", "dashboard", "request", "communication", "aboutApp","drawer-controller-hide","drawer-controller-show", "profilo", "legend-content","dettaglio","signature","loginForm","legend-position"];
-//"drawer-controller",
-
-
-var stati = ["da ritirare", "da consegnare", "consegnato"];
-var stato=0;
-
-var azioni = ["Ritira", "Consegna", "Chuso"];
-var azione=0;
+var shopsMap = new Array();
 
 
 
 
-// PRENDERE POSIZIONE DA GPS!!
-var posizione = {"lat":"41.891735559388124" , "lon" : "12.491819858551025", "address":"unable to get position"};
+
+/*  UTILS  */
+// symbol: k
+//  https://graph.facebook.com/riccardo.luna/picture
+//  https://www.mapbox.com/developers/api/geocoding/  beta
 
 
 
-var destinazione = 0;
 
 
-var percorsi = [
-{"latfrom":"41.89205502378826", "lonfrom":"12.49094009399414",  "latto":"41.914",  "lonto":"12.499",  "from":"Via del Colosseo, 12",  "to":"Via di Villa Albani",  "obj":"Busta",  "note":"URGENTE", "peso": "30g"},
-{"latfrom":"41.892550190450876", "lonfrom":"12.492753267288208",  "latto":"41.91228983675952",  "lonto":"12.507333755493164",  "from":"Via della Polveriera",  "to":"Viale Regina Marg..",  "obj":"Pacco",   "note":"FRAGILE", "peso": "500g"}
-];
-var percorso=0;
-
+/****  VIEW    ****/
 
 function hideAll(){
   for(i=0;i<divs.length;i++){
@@ -75,57 +78,130 @@ function showDrawerController(){
 }
 
 
-var getPositionOnSuccess = function (position) {
-    console.log('Latitude: ' + position.coords.latitude + '\n' +     'Longitude: ' + position.coords.longitude + '\n');
-
-   posizione.lat = position.coords.latitude ;
-   posizione.lon = position.coords.longitude ;
-   ridisegnaMappa();
-   getAddress();
-};
-function getPositionOnError(error) {
-    console.log('Error getting GPS Data');
+function showHome(){
+  if(loginas == "courier"){
+    showHomeCourier();
+  }else if(loginas == "client"){
+    showHomeClient();
+  }else{
+    startApp();
+  }
 }
 
-function getPosition(){
-  navigator.geolocation.getCurrentPosition(getPositionOnSuccess, getPositionOnError);
+function showHomeClient(){
+  // 20140601 rimanda alla homeCourier
+  loginas = "client";
+  showHomeCourier();
+/*
+  hideAll();
+  loginas = "client";
+  showDrawerController();
+  document.getElementById("homeClient").style.display = "block";
+  document.getElementById("addtitle").innerHTML=" - Client";
+*/
 }
 
-function getAddress(){
-  url = "http://api.tiles.mapbox.com/v3/"+mapID+"/geocode/"+posizione.lon+","+posizione.lat+".json";
-  $.getJSON( url, function( data ) {
-    posizione.address=data.results[0][0].name +" ("+data.results[0][2].name+")";
-    console.log("Posizione: " + data.results[0][0].name +" ("+data.results[0][2].name+")");
-   document.getElementById("leg-posizione").innerHTML = data.results[0][0].name +" ("+data.results[0][2].name+")";
+function showHomeCourier(){
+  if(loginas == ""){loginas = "courier";}
+  hideAll();
+  showDrawerController();
+  document.getElementById("legend-position").style.display = "block";
+  document.getElementById("legend-actionbar").style.display = "block";
+
+  document.getElementById("homeCourier").style.display = "block";
+  document.getElementById("addtitle").innerHTML=" - Home";
   
+  if(typeof(map) == "undefined" ){  
+    map =  L.mapbox.map('homeCourier', mapID) .setView([posizione.lat, posizione.lon], 16);
+    pCircle = L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+    p1 = L.marker([posizione.lat, posizione.lon], {
+      icon: L.mapbox.marker.icon({
+        'marker-size': 'medium',
+        'marker-symbol': 'star',
+        'marker-color': '#1087bf'
+      })
+    }).addTo(map);
+    
 
-  });
+
+  var index;
+  var indice=0;
+  for (index = 0; index < shops.length; ++index) {
+    for(var i=0;i<shops[index].items.length;++i){
+      
+      shopsMap[indice] = L.marker([shops[index].items[i].lat, shops[index].items[i].lon], {
+        icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-symbol': 'k',
+          'marker-color': '#cccccc'
+        })
+      }).addTo(map);
+      indice +=1;
+    }
+    
+  }
+
+
+  }else{
+    if(p1!=undefined){map.removeLayer(p1);}  
+    map.setView([posizione.lat, posizione.lon], 16)
+  }
+  if(m1!=undefined){map.removeLayer(m1);}
+  if(m2!=undefined){map.removeLayer(m2);}
+  if(dest!=undefined){map.removeLayer(dest);}
+  if(destCircle!=undefined){map.removeLayer(destCircle);}
+  
+  document.getElementById("legend-content").style.display = "none";
+  //document.getElementById("legend-position").style.display = "none";
+  
+}
+
+function showBacheca(){
+   hideAll();
+  showDrawerController();
+  document.getElementById("bacheca").style.display = "block";
+  document.getElementById("addtitle").innerHTML=" - BACHECA";
 }
 
 
 
 
+
+
+
+/****  CONTROLLER   ****/
 function startApp(){
   hideAll();
-user = [{
-  "code":"1",
-  "name":"Andrea", 
-  "surname":"Ercoli", 
-  "email":"andrea-ercoli@hotmail.it", 
-  "image":"style/images/userphoto.jpg", 
-  "mobile":"3333333333",
-  "password":"",
-  "mezzo":"bike",
-  "destinazioni":  [
-     {"lat":"" , "lon":"" , "name": "Universita", "items":"0", "address":"P. Aldo Moro"},
-     {"lat":"" , "lon":"" , "name": "Casa", "items":"0", "address":"Piazza Bologna"},
-     {"lat":"41.9132638845839" , "lon":"12.504587173461914" , "name": "Mamma", "items":"2", "address":"Via Alessandria"}
-  ]
-}];
+    user = [{
+      "code":"1",
+      "name":"Andrea", 
+      "surname":"Ercoli", 
+      "email":"andrea-ercoli@hotmail.it", 
+      "image":"style/images/userphoto.jpg", 
+      "mobile":"3333333333",
+      "password":"",
+      "mezzo":"bike",
+      "destinazioni":  [
+         {"lat":"" , "lon":"" , "name": "Universita", "items":"0", "address":"P. Aldo Moro"},
+         {"lat":"" , "lon":"" , "name": "Casa", "items":"0", "address":"Piazza Bologna"},
+         {"lat":"41.9132638845839" , "lon":"12.504587173461914" , "name": "Mamma", "items":"2", "address":"Via Alessandria"}
+      ]
+    }];
 
-getPosition();
+    getPosition();
+    popolaShops();
+/*
+  map =  L.mapbox.map('homeCourier', mapID) .setView([posizione.lat, posizione.lon], 16);
+  L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+    p1 = L.marker([posizione.lat, posizione.lon], {
+      icon: L.mapbox.marker.icon({
+        'marker-size': 'medium',
+        'marker-symbol': 'star',
+        'marker-color': '#1087bf'
+      })
+    }).addTo(map);
 
-
+*/
   if(username == ""){
     document.getElementById("splash").style.display = "block";
 
@@ -134,8 +210,6 @@ getPosition();
         // BUG se non ho un mezzo iniziale non posso impostarlo mai.. 
         document.getElementById("menuUsername").innerHTML = document.getElementById("menuUsername").innerHTML + ' (<div id="div-MezzoTrasporto"></div>)';
     }
-
-
     //POPOLA MENU (da spostare alla login + ciclo from server)
     document.getElementById("btn-Request0").innerHTML = user[0].destinazioni[0].name + " <em>("+ user[0].destinazioni[0].items  +")</em>" + "<span class='submenu'>"+user[0].destinazioni[0].address+"</span>";
     document.getElementById("btn-Request1").innerHTML = user[0].destinazioni[1].name + " <em>("+ user[0].destinazioni[1].items  +")</em>" + "<span class='submenu'>"+user[0].destinazioni[1].address+"</span>";
@@ -148,73 +222,34 @@ getPosition();
 }
 
 
-function showHome(){
-  if(loginas == "courier"){
-    showHomeCourier();
-  }else if(loginas == "client"){
-    showHomeClient();
-  }else{
-    startApp();
-  }
-
+/***   POSIZIONE  ***/
+function getPosition(){
+  navigator.geolocation.getCurrentPosition(getPositionOnSuccess, getPositionOnError);
 }
 
+var getPositionOnSuccess = function (position) {
+    console.log('Latitude: ' + position.coords.latitude + '\n' +     'Longitude: ' + position.coords.longitude + '\n');
 
-function showHomeClient(){
-  showHomeCourier();
-/*
-  hideAll();
-  loginas = "client";
-  showDrawerController();
-  document.getElementById("homeClient").style.display = "block";
-  document.getElementById("addtitle").innerHTML=" - Client";
-*/
-}
-
-function showHomeCourier(){
-  hideAll();
-  document.getElementById("legend-position").style.display = "block";
-  loginas = "courier";
-  showDrawerController();
-  document.getElementById("homeCourier").style.display = "block";
-  document.getElementById("addtitle").innerHTML=" - Home";
-  
-  if(typeof(map) == "undefined" ){  
-  map =  L.mapbox.map('homeCourier', mapID) 
-.setView([posizione.lat, posizione.lon], 16);
-  L.circle([posizione.lat, posizione.lon], 200).addTo(map);
-    p1 = L.marker([posizione.lat, posizione.lon], {
-      icon: L.mapbox.marker.icon({
-        'marker-size': 'medium',
-        'marker-symbol': 'star',
-        'marker-color': '#1087bf'
-      })
-    }).addTo(map);
-
-  }else{
-
-  map.setView([posizione.lat, posizione.lon], 16)
-  map.removeLayer(m1);
-  map.removeLayer(m2);
-  map.removeLayer(dest);
-  map.removeLayer(destCircle);
-//  map.removeControl(legend);
-//  legend = map.legendControl.removeLegend(legend);
-  document.getElementById("legend-content").style.display = "none";
-  document.getElementById("legend-position").style.display = "none";
-
-
-
-  }
-
+   posizione.lat = position.coords.latitude ;
+   posizione.lon = position.coords.longitude ;
+   ridisegnaMappa();
+   getAddress();
+test();
+};
+function getPositionOnError(error) {
+  document.getElementById("leg-posizione").innerHTML = "impossibile determinare la posizione";
+    console.log('Error getting GPS Data');
 }
 
 
 function ridisegnaMappa() {
   if(typeof(map) != "undefined" ){  
     map.setView([posizione.lat, posizione.lon], 16)
-    L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+    if(p1!=undefined){map.removeLayer(p1);}  
+    if(pCircle!=undefined){map.removeLayer(pCircle);}  
 
+    pCircle = L.circle([posizione.lat, posizione.lon], 200).addTo(map);
+console.log('ridisegnaMappa');
     p1 = L.marker([posizione.lat, posizione.lon], {
       icon: L.mapbox.marker.icon({
         'marker-size': 'medium',
@@ -225,6 +260,52 @@ function ridisegnaMappa() {
 
   }  
 }
+
+
+function getAddress(){
+  url = "http://api.tiles.mapbox.com/v3/"+mapID+"/geocode/"+posizione.lon+","+posizione.lat+".json";
+  $.getJSON( url, function( data ) {
+    posizione.address=data.results[0][0].name +" ("+data.results[0][2].name+")";
+    console.log("Posizione: " + data.results[0][0].name +" ("+data.results[0][2].name+")");
+   document.getElementById("leg-posizione").innerHTML = data.results[0][0].name +" ("+data.results[0][2].name+")";
+  
+
+  });
+}
+
+function popolaShops(){
+  var index;
+  for (index = 0; index < shops.length; ++index) {
+    $(menuNav).append( '<h2>'+shops[index].name+' <em>(TODO)</em></h2>');
+    var appo = "<ul>";
+    for(var i=0;i<shops[index].items.length;++i){
+      appo += '<li><a href="#" id="btn-shop'+i+'">'+shops[index].items[i].name+' <em>('+shops[index].items[i].items+')</em> <span class="submenu">'+shops[index].items[i].address+'</span></a></li>';
+    }
+    appo += "</ul>";
+    $(menuNav).append( appo);
+  }
+}
+
+
+
+
+function test(){
+  for(var i=0;i<5;i++){
+      var appo = (Math.random() * (2* 0.0018)) - 0.0018;
+      var appo1 = Math.random() * (2* 0.0018) - 0.0018;
+appo2 = parseFloat(posizione.lat) + appo;
+appo3 = parseFloat(posizione.lon) + appo1;
+      L.marker([ appo2 , appo3 ], {
+        icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-symbol': 'k',
+          'marker-color': '#a3e46b'
+        })
+      }).addTo(map);
+  }
+}
+
+
 
 
 
@@ -443,89 +524,39 @@ function doChangeStatus(){
 }
 
 
+function showNuovoIndirizzo(){
+  hideAll();
+  showDrawerController();
+  document.getElementById("addtitle").innerHTML=" - Nuovo indirizzo" ;
+  document.getElementById("nuovoIndirizzoForm").style.display = "block";
+}
+
+
+function addNuovoIndirizzo(){
+  // http://api.tiles.mapbox.com/v3/{mapid}/geocode/{query}.json
+  //     {"lat":"" , "lon":"" , "name": "Universita", "items":"0", "address":"P. Aldo Moro"},
+
+}
+
+
+function showNewOrder(){
+  hideAll();
+  showDrawerController();
+  document.getElementById("addtitle").innerHTML=" - ORDINE" ;
+  document.getElementById("nuovoOrdineForm").style.display = "block";  
+}
+
+
+
 function showSignature(){
   hideAll();
   showDrawerController();
-
-
 
   document.getElementById("addtitle").innerHTML=" - FIRMA" ;
 
   document.getElementById("signature").style.display = "block";
   resizeCanvas();  
 }
-
-window.onload = function () {
-  // aggiungo i listner	
-  //// document.getElementById("bLoginCourier").addEventListener("click", showHomeCourier);
-  document.getElementById("bLoginClient").addEventListener("click", showHomeClient);
-  document.getElementById("btn-Profilo").addEventListener("click", showProfilo);
-
-  document.getElementById("menuUsername").addEventListener("click", showHome);
-  
-
-  document.getElementById("btn-Request2").addEventListener("click", showRequests);
-
-  document.getElementById("btn-About").addEventListener("click", showAbout);
-
-  document.getElementById("prof-bike").addEventListener("click", selectBike);
-  document.getElementById("prof-scooter").addEventListener("click", selectScooter);
-  document.getElementById("prof-auto").addEventListener("click", selectAuto);
-  document.getElementById("prof-treno").addEventListener("click", selectTrain);
-
-  document.getElementById("legprev").addEventListener("click", selectPrev);
-  document.getElementById("legnext").addEventListener("click", selectNext);
-  document.getElementById("leg-accetta").addEventListener("click", doAccetta);
-  document.getElementById("bContattaRitiro").addEventListener("click", showCommunication);
-  document.getElementById("bContattaConsegna").addEventListener("click", showCommunication);
-
-  document.getElementById("bChiudiComunica").addEventListener("click", showDetails);
-  document.getElementById("bStatus").addEventListener("click", showSignature);
-
-
-  document.getElementById("bFirma").addEventListener("click", doChangeStatus);
-
-
-//  document.getElementById("").addEventListener("click", );
-
-
-/*
-  document.getElementById("bLoginClient").addEventListener("click", showHomeClient);
-  document.getElementById("btn-LogOff").addEventListener("click", doLogoff);
-  document.getElementById("bFormSignIn").addEventListener("click", doSignIn);
-  
-  //document.getElementById("btn-showNotifications").addEventListener("click", showCommunication);
-  //document.getElementById("btn-showRequests").addEventListener("click", showRequests);
-
-
-  //document.getElementById("req-001").addEventListener("click", showRequestDetail);
-
- */
-
-  startApp();
-
-    wrapper = document.getElementById("signature-pad");
-    clearButton = wrapper.querySelector("[data-action=clear]");
-    saveButton = wrapper.querySelector("[data-action=save]");
-    canvas = wrapper.querySelector("canvas");
-    
-resizeCanvas();
-signaturePad = new SignaturePad(canvas);
-clearButton.addEventListener("click", function (event) {
-    signaturePad.clear();
-});
-
-saveButton.addEventListener("click", function (event) {
-    if (signaturePad.isEmpty()) {
-        alert("Please provide signature first.");
-    } else {
-        window.open(signaturePad.toDataURL());
-    }
-});
-
-
-};
-
 
 
 
@@ -915,3 +946,66 @@ var SignaturePad = (function (document) {
 
 /////////////////////  AJAX
 // 20140601 deciso di introdurre jquery ..
+
+
+
+/*   ONLOAD  */
+
+window.onload = function () {
+  // aggiungo i listner	
+  //// document.getElementById("bLoginCourier").addEventListener("click", showHomeCourier);   // 20140601 rimosso login courier
+  document.getElementById("bLoginClient").addEventListener("click", showHomeClient);
+  document.getElementById("btn-Profilo").addEventListener("click", showProfilo);
+  document.getElementById("menuUsername").addEventListener("click", showHome);
+  document.getElementById("btn-Request2").addEventListener("click", showRequests);
+  document.getElementById("btn-RequestAdd").addEventListener("click", showNuovoIndirizzo);
+  document.getElementById("btn-leg-NuovoIndirizzo").addEventListener("click", showNuovoIndirizzo);
+
+  document.getElementById("btn-About").addEventListener("click", showAbout);
+  document.getElementById("prof-bike").addEventListener("click", selectBike);
+  document.getElementById("prof-scooter").addEventListener("click", selectScooter);
+  document.getElementById("prof-auto").addEventListener("click", selectAuto);
+  document.getElementById("prof-treno").addEventListener("click", selectTrain);
+  document.getElementById("legprev").addEventListener("click", selectPrev);
+  document.getElementById("legnext").addEventListener("click", selectNext);
+  document.getElementById("leg-accetta").addEventListener("click", doAccetta);
+  document.getElementById("bContattaRitiro").addEventListener("click", showCommunication);
+  document.getElementById("bContattaConsegna").addEventListener("click", showCommunication);
+  document.getElementById("bChiudiComunica").addEventListener("click", showDetails);
+  document.getElementById("bStatus").addEventListener("click", showSignature);
+  document.getElementById("bFirma").addEventListener("click", doChangeStatus);
+  document.getElementById("btn-NewOrder").addEventListener("click", showNewOrder);
+
+  document.getElementById("btn-Bacheca").addEventListener("click", showBacheca);
+  document.getElementById("btn-leg-bacheca").addEventListener("click", showBacheca);
+
+  document.getElementById("btn-ricalcolaMappa").addEventListener("click", ridisegnaMappa);
+
+//  document.getElementById("").addEventListener("click", );
+
+  startApp();
+
+  wrapper = document.getElementById("signature-pad");
+  clearButton = wrapper.querySelector("[data-action=clear]");
+  saveButton = wrapper.querySelector("[data-action=save]");
+  canvas = wrapper.querySelector("canvas");
+    
+  resizeCanvas();
+  signaturePad = new SignaturePad(canvas);
+  clearButton.addEventListener("click", function (event) {
+    signaturePad.clear();
+  });
+
+  saveButton.addEventListener("click", function (event) {
+    if (signaturePad.isEmpty()) {
+        alert("Please provide signature first.");
+    } else {
+        window.open(signaturePad.toDataURL());
+    }
+});
+
+
+};
+
+
+

@@ -28,23 +28,24 @@
   <header>
     <h1 ><a id="menuUsername" href='#'></a></h1>
   </header>
-   <nav>
+   <nav id="menuNav">
     <h2>Posizioni salvate</h2>
     <ul>
         <li><a href="#" id="btn-Request0"></a></li>
         <li><a href="#" id="btn-Request1"></a></li>
         <li><a href="#" id="btn-Request2"></a></li>
+        <li><a href="#" id="btn-RequestAdd">Aggiungi indirizzo</a></li>
     </ul>
     <h2><a href="#" id="btn-Profilo">Profilo</a></h2>
     <ul>
         <!-- <li><a href="#" id="btn-Profilo">Profilo</a></li> -->
+
+        <li><a href="#" id="btn-Bacheca">Bacheca</a></li>
+        
+        <li><a href="#" id="btn-NewOrder">Inserisci ordine</a></li>
         <li><a href="#" id="btn-LogOff">Log off</a></li>
         <!-- <li><a href="#" id="btn-MezzoTrasporto">Cambia mezzo</a></li>  -->
         <li><a href="#" id="btn-About">About</a></li>
-    </ul>
-    <h2>Shop</h2>
-    <ul>
-        <li><a href="#" id="btn-shop1">Gruppo Clark <em>(1)</em></a></li>
     </ul>
   </nav>
 </section>
@@ -97,10 +98,50 @@
       </form>   
     </div>
 
+    <!-- NUOVOORDINEFORM -->
+    <div id="nuovoOrdineForm">
+      <form>
+        <fieldset>
+         <legend>TODO</legend>
+          <section><p><input id="xxx" type="text" required="required"></p></section>
+         </fieldset>
+        <fieldset>
+         <legend>TODO</legend>
+          <section><p><input id="yyy" type="text" required="required"></p></section>
+         </fieldset>
+      <a id="bFormNuovoOrdine" role="button" href="#">Inserisci</a>
+      </form>   
+    </div>
+
+    <!--  NUOVOINDIRIZZOFORM  -->
+    <div id="nuovoIndirizzoForm">
+      <form>
+        <fieldset>
+         <legend>Nome</legend>
+          <section><p><input id="newAddressName" type="text" required="required"></p></section>
+         </fieldset>
+        <fieldset>
+         <legend>Indirizzo</legend>
+          <section><p><input id="newAddress" type="text" required="required"></p></section>
+         </fieldset>
+         <legend>Citt&agrave;</legend>
+          <section><p><input id="newAddressCity" type="text" required="required"></p></section>
+         </fieldset>
+      <a id="bFormNuovoIndirizzo" role="button" href="#">Inserisci</a>
+      </form>   
+    </div>
+
+
+ <div id='legend-actionbar' style="display:none;" >
+    <div class='my-legend'>
+      <div class='legend-title'><a href="#" id="btn-leg-bacheca">Bacheca</a> - <a href="#" id="btn-leg-NuovoIndirizzo">Inserisci nuovo indirizzo</a></div>
+    </div>
+  </div>  
+
 
  <div id='legend-position' style="display:none;" >
     <div class='my-legend'>
-      <div class='legend-title'>Posizione: <span id="leg-posizione"></span></div>
+      <div class='legend-title'>Posizione: <span id="leg-posizione"></span><a href="#" id="btn-ricalcolaMappa">Ricalcola</a></div>
     </div>
   </div>  
 
@@ -141,6 +182,26 @@
         <a id="bProfileLogout" role="button" href="#">Logout</a>
     </div>
 
+
+
+    <!-- BACHECA -->  <!-- Valore (euro)  PuntodiPartenza   PuntodiArrivo  KM   descrizione  periodo di validità -->
+    <div id="bacheca">
+      <ul>
+        <li>
+          <h1 class="communicationTitle">Periodo di validit&agrave;: 6h</h1>
+          <p><a href="#" id="bac-001">Valore: 6Euro - PuntodiPartenza: Via Laurentina - PuntodiArrivo: Via Tiburtina - Km: 18 - Descrizione: pacco 1kg</a></p>
+        </li>
+        <li>
+          <h1 class="communicationTitle">Periodo di validit&agrave;: 2h</h1>
+          <p><a href="#" id="bac-002">Valore: 5Euro - PuntodiPartenza: Via Laurentina - PuntodiArrivo: Via Tiburtina - Km: 18 - Descrizione: pacco 1kg</a></p>
+        </li>
+        <li>
+          <h1 class="communicationTitle">Periodo di validit&agrave;: 12h</h1>
+          <p><a href="#" id="bac-003">Valore: 4,50Euro - PuntodiPartenza: Via Laurentina - PuntodiArrivo: Via Tiburtina - Km: 18 - Descrizione: pacco 1kg</a></p>
+        </li>
+
+      </ul>    
+    </div>
 
 
 
@@ -283,6 +344,12 @@
     </div>    
     <div id="map"></div>
     -->
+    
+    <div id="splashScreen">
+      <p></p>
+    </div>
+    
+    
   </div>
 </section>
 
