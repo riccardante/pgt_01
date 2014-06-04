@@ -677,9 +677,23 @@ position: absolute;
 height: 100%;
 width: 100%;
 top: 0;
-background: #fff;    
+background: #ffffff url(images/splash_logo.jpg) no-repeat;;    
 }
 
 #splashScreen p{
     heigth:100%;
+}
+
+#btn-leg-NuovoIndirizzo{
+position: absolute;
+right: 1rem;
+}
+
+#btn-leg-bacheca{
+  /*  position:absolute;  */
+    left:1rem;
+}
+
+#btn-ricalcolaMappa{
+    padding: 2rem;
 }
