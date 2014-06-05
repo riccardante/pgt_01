@@ -26,10 +26,15 @@ var destinazione = 0;
 
 
 var percorsi = [
-                         {"latfrom":"41.89205502378826", "lonfrom":"12.49094009399414",  "latto":"41.914",  "lonto":"12.499",  "from":"Via del Colosseo, 12",  "to":"Via di Villa Albani",  "obj":"Busta",  "note":"URGENTE", "peso": "30g"},
-                         {"latfrom":"41.892550190450876", "lonfrom":"12.492753267288208",  "latto":"41.91228983675952",  "lonto":"12.507333755493164",  "from":"Via della Polveriera",  "to":"Viale Regina Marg..",  "obj":"Pacco",   "note":"FRAGILE", "peso": "500g"}
+                         {"latfrom":"41.89205502378826", "lonfrom":"12.49094009399414",  "latto":"41.914",  "lonto":"12.503",  "from":"Via del Colosseo, 12",  "to":"Via di Villa Albani",  "obj":"Busta",  "note":"URGENTE", "peso": "30g"},
+                         {"latfrom":"41.892550190450876", "lonfrom":"12.492753267288208",  "latto":"41.91228983675952",  "lonto":"12.507",  "from":"Via della Polveriera",  "to":"Viale Regina Marg..",  "obj":"Pacco",   "note":"FRAGILE", "peso": "500g"}
 ];
 var percorso=0;
+
+var bacheca = [  
+    {"id":"23411","latfrom":"41.834168", "lonfrom":"12.467506",  "latto":"51.508849",  "lonto":"-0.12409",  "from":"Roma, EUR",  "to":"Londra, Convent Garden",  "distanza":"1500Km", "descrizione":"Pacco", "peso":"1kg", "validita":"2 giorni","valore":"36,00 Euro"},
+    {"id":"23432","latfrom":"41.90918", "lonfrom":"12.464861",  "latto":"44.837822",  "lonto":"11.62063",  "from":"Roma, Prati",  "to":"Ferrara centro",  "distanza":"450Km", "descrizione":"Pacco", "peso":"10kg", "validita":"8 ore","valore":"19,00 Euro" }
+];
 
 var user = "";
 var wrapper;
@@ -49,7 +54,7 @@ var m1;
 var m2;
 var legend;
 var shopsMap = new Array();
-
+var bachecaMap= new Array();
 
 
 
@@ -141,9 +146,22 @@ function showHomeCourier(){
     
   }
 
+  var indiceB = 0;
+    for(var i=0;i<=shops.length;++i){
+      
+      bachecaMap[indiceB] = L.marker([bacheca[i].latfrom, bacheca[i].lonfrom], {
+        icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-symbol': 'k',
+          'marker-color': '#a3e46b'
+        })
+      }).addTo(map);
+      indiceB+=1;
+    }
+
 
   }else{
-    if(p1!=undefined){map.removeLayer(p1);}  
+    ////  if(p1!=undefined){map.removeLayer(p1);}  
     map.setView([posizione.lat, posizione.lon], 16)
   }
   if(m1!=undefined){map.removeLayer(m1);}
@@ -161,6 +179,21 @@ function showBacheca(){
   showDrawerController();
   document.getElementById("bacheca").style.display = "block";
   document.getElementById("addtitle").innerHTML=" - BACHECA";
+  var appo="<ul>";
+
+  for(i=0;i<=1;++i){
+    appo += '<li><h1 class="communicationTitle">Periodo di validit&agrave;: ';
+    appo += bacheca[i].validita;
+    appo += '</h1><p>';
+    appo += 'Valore: ' + bacheca[i].valore;
+    appo += ' - DA: ' + bacheca[i].from;
+    appo += ' - A: ' + bacheca[i].to;
+    appo += ' - Distanza: ' + bacheca[i].distanza;
+    appo += ' - Descrizione: ' + bacheca[i].descrizione;
+    appo += '</p></li>';
+  }
+  appo += '</ul>';
+  $('#bacheca').html(appo);
 }
 
 
@@ -234,6 +267,7 @@ var getPositionOnSuccess = function (position) {
    posizione.lon = position.coords.longitude ;
    ridisegnaMappa();
    getAddress();
+fakePosizioniVicine();
 test();
 };
 function getPositionOnError(error) {
@@ -287,7 +321,16 @@ function popolaShops(){
 }
 
 
-
+function fakePosizioniVicine(){
+  for(var i=0;i<2;i++){
+      var appo = (Math.random() * (2* 0.0018)) - 0.0018;
+      var appo1 = Math.random() * (2* 0.0018) - 0.0018;
+      appo2 = parseFloat(posizione.lat) + appo;
+      appo3 = parseFloat(posizione.lon) + appo1;
+      percorsi[i].latfrom = appo2;
+      percorsi[i].lonfrom = appo3;
+  }
+}
 
 function test(){
   for(var i=0;i<5;i++){
@@ -957,6 +1000,8 @@ window.onload = function () {
   document.getElementById("bLoginClient").addEventListener("click", showHomeClient);
   document.getElementById("btn-Profilo").addEventListener("click", showProfilo);
   document.getElementById("menuUsername").addEventListener("click", showHome);
+  document.getElementById("btn-Request0").addEventListener("click", showHome);
+  document.getElementById("btn-Request1").addEventListener("click", showHome);
   document.getElementById("btn-Request2").addEventListener("click", showRequests);
   document.getElementById("btn-RequestAdd").addEventListener("click", showNuovoIndirizzo);
   document.getElementById("btn-leg-NuovoIndirizzo").addEventListener("click", showNuovoIndirizzo);
@@ -976,7 +1021,7 @@ window.onload = function () {
   document.getElementById("bFirma").addEventListener("click", doChangeStatus);
   document.getElementById("btn-NewOrder").addEventListener("click", showNewOrder);
 
-  document.getElementById("btn-Bacheca").addEventListener("click", showBacheca);
+  // document.getElementById("btn-Bacheca").addEventListener("click", showBacheca);
   document.getElementById("btn-leg-bacheca").addEventListener("click", showBacheca);
 
   document.getElementById("btn-ricalcolaMappa").addEventListener("click", ridisegnaMappa);
